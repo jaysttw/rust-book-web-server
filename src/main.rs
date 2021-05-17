@@ -12,8 +12,8 @@ fn main() {
     }
 }
 
-fn handle_connection(mut stream: TcpStream) {
-    let mut buffer = [0; 1024];
+fn handle_connection(mut stream: TcpStream) { // stream needs to be mutable because the stream's internal state might change (e.g. receiving more data)
+    let mut buffer = [0; 1024]; // buffer management needs to be more complicated to handle requests of arbitrary size
 
     stream.read(&mut buffer).unwrap();
 
