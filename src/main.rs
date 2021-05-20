@@ -3,12 +3,16 @@ use std::{fs, io::prelude::*};
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap(); // should normally handle the errors
+    let pool = ThreadPool::new();
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         println!("Connection established!");
 
-        handle_connection(stream);
+        pool.execute(|| {
+            // skipping over thread spawn example in Listing 20-11.
+            handle_connection(stream);
+        });
     }
 }
 
