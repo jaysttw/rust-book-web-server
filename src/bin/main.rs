@@ -4,7 +4,7 @@ use rust_book_web_server::ThreadPool;
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap(); // should normally handle the errors
-    let pool = ThreadPool::new();
+    let pool = ThreadPool::new(4); // arbitrary size added to remove error.
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
