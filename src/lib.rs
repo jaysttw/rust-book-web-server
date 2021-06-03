@@ -35,6 +35,9 @@ impl ThreadPool {
     where F: FnOnce() + Send + 'static,
     {
         // Should have a similar interface to `thread::spawn`.
+        let job = Box::new(f);
+
+        self.sender.send(job).unwrap();
     }
 }
 
