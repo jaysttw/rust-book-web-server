@@ -37,7 +37,7 @@ impl ThreadPool {
         // Should have a similar interface to `thread::spawn`.
         let job = Box::new(f);
 
-        self.sender.send(job).unwrap();
+        self.sender.send(job).unwrap(); // `unwrap` is used because failure case cannot happen.
     }
 }
 
@@ -48,8 +48,12 @@ struct Worker {
 
 impl Worker {
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
-        let thread = std::thread::spawn(|| {
-            receiver;
+        let thread = std::thread::spawn(move || loop {
+            let job = receiver.lock().unwrap().recv().unwrap(); // possibly rewrite to produce errors instead of panic.
+
+            println!("Worker {} got a job; executing.", id);
+
+            job();
         });
 
         Worker { id, thread }
