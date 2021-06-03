@@ -1,7 +1,7 @@
 use std::{thread::Thread, usize};
 
 pub struct ThreadPool {
-    threads: Vec<thread::JoinHandle<()>>
+    workers: Vec<Worker>
 };
 
 impl ThreadPool {
@@ -16,18 +16,31 @@ impl ThreadPool {
         /// The `new` function will panic if the size is zero.
         assert!(size > 0);
         
-        let mut threads = Vec::with_capacity(size); // `with_capacity` pre-allocates fixed size
+        let mut workers = Vec::with_capacity(size); // `with_capacity` pre-allocates fixed size
 
-        for _ in 0..size {
-            // do something
+        for id in 0..size {
+            workers.push(Worker::new(id))
         }
 
-        ThreadPool { threads }
+        ThreadPool { workers }
     }
 
     pub fn execute<F>(&self, f:F)
     where F: FnOnce() + Send + 'static,
     {
         // Should have a similar interface to `thread::spawn`.
+    }
+}
+
+struct Worker {
+    id: usize,
+    thread: thread::JoinHandle<()>,
+}
+
+impl Worker {
+    fn new(id: usize) -> Worker {
+        let thread = thread::spawn(|| {});
+
+        Worker { id, thread }
     }
 }
