@@ -1,8 +1,14 @@
 use std::{thread::Thread, usize};
+use std::sync::mpsc;
 
 pub struct ThreadPool {
-    workers: Vec<Worker>
-};
+    workers: Vec<Worker>,
+    sender: mpsc::Sender<Job>,
+}
+
+struct Job {
+
+}
 
 impl ThreadPool {
     // pub fn new(size: usize) -> Result<ThreadPool, PoolCreationError> {
@@ -15,6 +21,8 @@ impl ThreadPool {
         ///
         /// The `new` function will panic if the size is zero.
         assert!(size > 0);
+
+        let (sender, receiver) = mpsc::channel();
         
         let mut workers = Vec::with_capacity(size); // `with_capacity` pre-allocates fixed size
 
@@ -22,7 +30,7 @@ impl ThreadPool {
             workers.push(Worker::new(id))
         }
 
-        ThreadPool { workers }
+        ThreadPool { workers, sender }
     }
 
     pub fn execute<F>(&self, f:F)
