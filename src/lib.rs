@@ -41,6 +41,16 @@ impl ThreadPool {
     }
 }
 
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        for worker in &mut self.workers {
+            println!("Shutting down worker {}", worker.id);
+
+            worker.thread.join().unwrap(); // will not work because `join` requires ownership, but worker is only borrowed.
+        }
+    }
+}
+
 struct Worker {
     id: usize,
     thread: std::thread::JoinHandle<()>,
