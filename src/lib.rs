@@ -2,7 +2,7 @@ use std::{sync::{Mutex, mpsc, Arc}, usize};
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: mpsc::Sender<Job>,
+    sender: mpsc::Sender<Message>,
 }
 
 type Job = Box<dyn FnOnce() + Send + 'static>;
@@ -37,7 +37,7 @@ impl ThreadPool {
         // Should have a similar interface to `thread::spawn`.
         let job = Box::new(f);
 
-        self.sender.send(job).unwrap(); // `unwrap` is used because failure case cannot happen.
+        self.sender.send(Message::NewJob(job)).unwrap(); // `unwrap` is used because failure case cannot happen.
     }
 }
 
@@ -66,11 +66,19 @@ struct Worker {
 impl Worker {
     fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Worker {
         let thread = std::thread::spawn(move || loop {
-            let job = receiver.lock().unwrap().recv().unwrap(); // possibly rewrite to produce errors instead of panic.
+            let message = receiver.lock().unwrap().recv().unwrap(); // possibly rewrite to produce errors instead of panic.
 
             println!("Worker {} got a job; executing.", id);
-
-            job();
+            
+            match message {
+                Message::NewJob(job) => {
+                    println!("Worker {} got a new job; executing...", id)
+                }
+                Message::Terminate => {
+                    println!("Worker {} received an order to terminate.", id)
+                    break;
+                }
+            }
         });
 
         Worker {
