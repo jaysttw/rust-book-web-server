@@ -53,6 +53,11 @@ impl Drop for ThreadPool {
     }
 }
 
+enum Message {
+    NewJob(Job),
+    Terminate,
+}
+
 struct Worker {
     id: usize,
     thread: Option<std::thread::JoinHandle<()>>,
